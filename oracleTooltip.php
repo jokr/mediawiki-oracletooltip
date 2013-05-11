@@ -16,13 +16,6 @@ $wgExtensionCredits['parser'][] = array(
 $wgHooks['ParserFirstCallInit'][] = 'parserInit';
 $wgHooks['BeforePageDisplay'][] = 'loadResources';
 
-$wgResourceModules['jquery.ui.tooltip'] = array(
-    'scripts' => '/jquery.ui.tooltip.js',
-    'dependencies' => array('jquery.ui.core', 'jquery.ui.widget', 'jquery.ui.position'),
-    'localBasePath' => dirname(__FILE__).'/../JavaScript',
-    'remoteExtPath' => 'JavaScript'
-);
-
 $wgResourceModules['ext.oracleTooltip'] = array(
     'scripts' => 'js/ext.oracleTooltip.js',
     'styles' => 'css/ext.oracleTooltip.css',
@@ -47,5 +40,5 @@ function render($input, array $parameters, Parser $parser)
 {
     $server = $parser->getVariableValue('server');
     $script = $parser->getVariableValue('scriptpath');
-    return '<a class="mtg-card" src="'.$server.$script.'/extensions/OracleTooltip/js/txtoracle.php">' . htmlspecialchars($input) . '</a>';
+    return '<a class="mtg-card" src="'.$server.$script.'/extensions/OracleTooltip/txtoracle.php">' . htmlspecialchars($input) . '</a>';
 }
