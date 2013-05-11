@@ -40,5 +40,5 @@ function render($input, array $parameters, Parser $parser)
 {
     $server = $parser->getVariableValue('server');
     $script = $parser->getVariableValue('scriptpath');
-    return '<a class="mtg-card" src="'.$server.$script.'/extensions/OracleTooltip/txtoracle.php">' . htmlspecialchars($input) . '</a>';
+    return '<a class="mtg-card" src="'.$server.$script.'/extensions/OracleTooltip/oracle.php">' . htmlspecialchars($input) . '</a>';
 }

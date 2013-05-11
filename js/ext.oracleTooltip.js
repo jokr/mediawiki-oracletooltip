@@ -14,6 +14,7 @@ cards.click(function () {
     params += "height=670";
 
     var cardName = jQuery(this).html();
+    // TODO implement search for split cards
 
     window.open("http://gatherer.wizards.com/Pages/Card/Details.aspx?name="+cardName, windowName, params);
 });

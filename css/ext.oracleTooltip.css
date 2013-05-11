@@ -7,3 +7,13 @@
     padding: 5px;
     z-index: 100;
 }
+
+.oracle-tooltip .card:not(:first-child) {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.oracle-tooltip .card .rules {
+    padding: 5px 0;
+    display: inline-block;
+}

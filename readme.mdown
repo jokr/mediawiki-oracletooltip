@@ -10,7 +10,7 @@ Download all the files and copy them into the `extensions` folder of your mediaw
 	$wgResourceModules['jquery.ui.tooltip'] = array(  
     	'scripts' => 'extensions/JavaScript/jquery.ui.tooltip.js',  
     	'dependencies' => array('jquery.ui.core', 'jquery.ui.widget', 'jquery.ui.position'),  
-    	'localBasePath' => __DIR__.$wgScriptPath,  
+    	'localBasePath' => __DIR__,  
     	'remoteExtPath' => 'JavaScript'  
    	);
 

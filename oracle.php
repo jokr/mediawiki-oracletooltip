@@ -1,10 +1,24 @@
 <?php
 $cardname = $_GET["name"];
-
-// Fetch oracle
 $url = "http://gatherer.wizards.com/Pages/Card/Details.aspx";
-$oracle_page = curl_get($url, array("name" => $cardname));
 try {
+    // Fetch oracle
+    $isSplit = strpos($cardname, '//');
+    if ($isSplit) {
+        $firstHalf = substr($cardname, 0, $isSplit - 1);
+        $secondHalf = substr($cardname, $isSplit + 3);
+        $oracle_page[] = curl_get($url, array("name" => $firstHalf, "part" => $firstHalf));
+        $oracle_page[] = curl_get($url, array("name" => $secondHalf, "part" => $secondHalf));
+    } else {
+        $oracle_page[] = curl_get($url, array("name" => $cardname));
+        //ugly check for flip cards, no better way found (yet)
+        $isFlipCard = strpos($oracle_page[0], "cardComponent1\" class=\"cardComponentContainer\"><div");
+        if($isFlipCard) {
+            $oracle_page[] = substr($oracle_page[0], $isFlipCard);
+            $oracle_page[0] = substr($oracle_page[0], 0, $isFlipCard);
+        }
+    }
+
     $card = extract_card($oracle_page);
 } catch (Exception $e) {
     echo "<b>Error:</b> " . $e->getMessage();
@@ -31,31 +45,35 @@ function curl_get($url, array $get = NULL, array $options = array())
     return $result;
 }
 
-function extract_card($html_content)
+function extract_card(array $input)
 {
     $result = array();
 
-    $posName = strpos($html_content, "Card Name:");
+    foreach ($input as $html_content) {
+        $posName = strpos($html_content, "Card Name:");
 
-    if (!$posName) {
-        throw new Exception("No card with this name found.");
+        if (!$posName) {
+            throw new Exception("No card with this name found.");
+        }
+
+        $posMana = strpos($html_content, "Mana Cost:");
+        $posTypes = strpos($html_content, "Types:");
+        $posText = strpos($html_content, "Card Text:");
+        $posFlavor = strpos($html_content, "Flavor Text:");
+        $posPT = strpos($html_content, "P/T:");
+        $posLoyalty = strpos($html_content, "Loyalty:");
+        $posExp = strpos($html_content, "Expansion:");
+
+        $card['name'] = extract_name($html_content, $posName, $posMana, $posTypes);
+        $card['mana'] = extract_mana($html_content, $posMana);
+
+        $card['types'] = extract_types($html_content, $posTypes, $posText, $posFlavor, $posPT);
+        $card['text'] = extract_text($html_content, $posText, $posFlavor, $posPT, $posLoyalty, $posExp);
+        $card['pt'] = extract_pt($html_content, $posPT, $posExp);
+        $card['loyalty'] = extract_loyalty($html_content, $posLoyalty, $posExp);
+
+        $result[] = $card;
     }
-
-    $posMana = strpos($html_content, "Mana Cost:");
-    $posTypes = strpos($html_content, "Types:");
-    $posText = strpos($html_content, "Card Text:");
-    $posFlavor = strpos($html_content, "Flavor Text:");
-    $posPT = strpos($html_content, "P/T:");
-    $posLoyalty = strpos($html_content, "Loyalty:");
-    $posExp = strpos($html_content, "Expansion:");
-
-    $result['name'] = extract_name($html_content, $posName, $posMana, $posTypes);
-    $result['mana'] = extract_mana($html_content, $posMana);
-
-    $result['types'] = extract_types($html_content, $posTypes, $posText, $posFlavor, $posPT);
-    $result['text'] = extract_text($html_content, $posText, $posFlavor, $posPT, $posLoyalty, $posExp);
-    $result['pt'] = extract_pt($html_content, $posPT, $posExp);
-    $result['loyalty'] = extract_loyalty($html_content, $posLoyalty, $posExp);
 
     return $result;
 }
@@ -108,7 +126,6 @@ function extract_text($html_content, $posText, $posFlavor, $posPT, $posLoyalty, 
     if (!$posText) {
         return null;
     }
-
     if ($posFlavor) {
         $endText = $posFlavor - $posText;
     } else if ($posPT) {
@@ -121,8 +138,10 @@ function extract_text($html_content, $posText, $posFlavor, $posPT, $posLoyalty, 
 
     $text = substr($html_content, $posText, $endText);
     $text = str_replace('src="', 'src="http://gatherer.wizards.com', $text);
+    $text = str_replace('<div class="cardtextbox">', '<br/>', $text);
     $text = strip_tags($text, "<img><br>");
     $text = trim(str_replace("Card Text:", "", $text));
+    $text = substr($text, 5); // to remove the first <br/> tag
     return $text;
 }
 
@@ -150,22 +169,23 @@ function extract_loyalty($html_content, $posLoyalty, $posExp)
     return $loyalty;
 }
 
-function display_tooltip($card)
+function display_tooltip($cards)
 {
-    echo "<b>" . $card['name'] . "</b><br />";
-    if($card['mana']) {
-        echo $card['mana'] . "<br />";
-    }
-    echo $card['types'] . "<br />";
-    if($card['text']) {
-        echo $card['text'] . "<br />";
-    }
-    if($card['pt']) {
-        echo $card['pt'] . "<br />";
-    }
-    if($card['loyalty']) {
-        echo $card['loyalty'] . "<br />";
+    foreach ($cards as $card) {
+        echo "<span class=\"card\"><b>" . $card['name'] . "</b><br />";
+        if ($card['mana']) {
+            echo $card['mana'] . "<br />";
+        }
+        echo $card['types'] . "<br />";
+        if ($card['text']) {
+            echo "<span class=\"rules\">".$card['text'] . "</span><br />";
+        }
+        if ($card['pt']) {
+            echo $card['pt'] . "<br />";
+        }
+        if ($card['loyalty']) {
+            echo $card['loyalty'] . "<br />";
+        }
+        echo "</span>";
     }
 }
-
-?>
