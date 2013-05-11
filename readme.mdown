@@ -1,0 +1,25 @@
+# Mediawiki Oracle Tooltips
+
+This is a small extension for [Mediawiki](http://www.mediawiki.org "Mediawiki") that allows users to use the custom tag `<c>card name</c>` to link cards directly to the [official gatherer](gatherer.wizards.com "Official Gatherer") and to display a tool tip with the most recent oracle text.
+
+## Installation
+
+Download all the files and copy them into the `extensions` folder of your mediawiki installation. Then include it in your `LocalSettings.php` as follows:
+
+    require_once( "$IP/extensions/OracleTooltip/OracleTooltip.php" );
+
+This plugin requires the additional jQuery ui widget `jquery.ui.tooltip`. It is also included in the sources. If you have already added the plugin you can safely delete it here.
+
+## Use
+
+Users now can use the custom tag `<c></c>`. Inside the tag should be nothing but the card name.
+
+### Examples
+
+    <c>Llanowar Elves</c>
+    <c>Island</c>
+	<c>Jace Beleren</c>
+
+## Contributions
+
+The initial code base has been provided by Thomas Marchiori.
